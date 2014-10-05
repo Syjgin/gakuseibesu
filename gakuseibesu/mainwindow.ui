@@ -1,24 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>672</width>
+    <height>416</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QMenuBar" name="menuBar" />
-  <widget class="QToolBar" name="mainToolBar" />
-  <widget class="QWidget" name="centralWidget" />
-  <widget class="QStatusBar" name="statusBar" />
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="buttonAdd">
+        <property name="text">
+         <string>&amp;Add new profile</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonSearch">
+        <property name="text">
+         <string>&amp;Search</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonExport">
+        <property name="text">
+         <string>&amp;Export</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>672</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_actions">
+    <property name="title">
+     <string>&amp;actions</string>
+    </property>
+    <addaction name="actionAdd_new_profile"/>
+    <addaction name="actionSearch"/>
+    <addaction name="actionExport"/>
+   </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>&amp;help</string>
+    </property>
+    <addaction name="action_About_program"/>
+    <addaction name="action_About_Qt"/>
+   </widget>
+   <addaction name="menu_actions"/>
+   <addaction name="menu_help"/>
+  </widget>
+  <action name="actionAdd_new_profile">
+   <property name="text">
+    <string>add new profile</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>search</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>export</string>
+   </property>
+  </action>
+  <action name="action_About_program">
+   <property name="text">
+    <string>About program</string>
+   </property>
+  </action>
+  <action name="action_About_Qt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
 </ui>
