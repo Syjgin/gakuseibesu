@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddNewProfileDialog</class>
+ <widget class="QDialog" name="AddNewProfileDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>581</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Add new profile</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label1">
+     <property name="text">
+      <string>LastName</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lastName"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label2">
+     <property name="text">
+      <string>FirstName</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="firstName"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label3">
+     <property name="text">
+      <string>Patronymic</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="patronymic"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label4">
+     <property name="text">
+      <string>Birthday</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCalendarWidget" name="calendarWidget">
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="gridVisible">
+      <bool>true</bool>
+     </property>
+     <property name="verticalHeaderFormat">
+      <enum>QCalendarWidget::NoVerticalHeader</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="ageLabel">
+     <property name="text">
+      <string>Age:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label5">
+     <property name="text">
+      <string>Document</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="document"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label6">
+     <property name="text">
+      <string>Address</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="address"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label7">
+     <property name="text">
+      <string>Telephone</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="telephone">
+     <property name="inputMethodHints">
+      <set>Qt::ImhDigitsOnly</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Sex</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="sexComboBox">
+     <item>
+      <property name="text">
+       <string>Man</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Woman</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>AddNewProfileDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>AddNewProfileDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

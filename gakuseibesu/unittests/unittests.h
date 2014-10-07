@@ -7,7 +7,7 @@ class UnitTests : public QObject
 {
     Q_OBJECT
 private slots:
-    void ProfileInsertTest();
+    void DatabaseTest();
 };
 
 #endif // UNITTESTS_H
