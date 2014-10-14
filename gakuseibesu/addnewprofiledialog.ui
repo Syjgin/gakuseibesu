@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>581</height>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,6 +43,16 @@
    </item>
    <item>
     <widget class="QLineEdit" name="patronymic"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label8">
+     <property name="text">
+      <string>Sensei</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="sensei"/>
    </item>
    <item>
     <widget class="QLabel" name="label4">

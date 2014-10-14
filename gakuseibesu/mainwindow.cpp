@@ -18,6 +18,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete base;
+    if(profileDialog != NULL)
+        delete profileDialog;
 }
 
 void MainWindow::on_buttonAdd_clicked()
@@ -31,7 +33,7 @@ void MainWindow::on_buttonAdd_clicked()
         profileToAdd.Id = currentIndex;
         base->AddProfile(profileToAdd);
         RefreshProfileList();
-        profileDialog->~AddNewProfileDialog();
+        delete profileDialog;
     }
 }
 
@@ -67,7 +69,7 @@ void MainWindow::on_buttonEdit_clicked()
         {
             base->UpdateProfile(profileDialog->GetUpdatedProfile());
             RefreshProfileList();
-            profileDialog->~AddNewProfileDialog();
+            delete profileDialog;
         }
     }
 }

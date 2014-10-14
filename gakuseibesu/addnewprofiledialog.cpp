@@ -12,7 +12,7 @@ AddNewProfileDialog::AddNewProfileDialog(QWidget *parent) :
 
 AddNewProfileDialog::~AddNewProfileDialog()
 {
-    delete ui;
+        delete ui;
 }
 
 void AddNewProfileDialog::LoadProfile(Profile profile)
@@ -22,10 +22,12 @@ void AddNewProfileDialog::LoadProfile(Profile profile)
     ui->lastName->setText(profileToEdit.Lastname);
     ui->patronymic->setText(profileToEdit.Patronym);
     ui->calendarWidget->setSelectedDate(profileToEdit.Birthday);
+    UpdateAgeLabel(profileToEdit.Birthday);
     ui->document->setText(profileToEdit.Document);
     ui->address->setText(profileToEdit.Addres);
     ui->telephone->setText(QString::number(profileToEdit.Telephone));
     ui->sexComboBox->setCurrentIndex(profileToEdit.Sex==0);
+    ui->sensei->setText(profileToEdit.Sensei);
 }
 
 Profile AddNewProfileDialog::GetUpdatedProfile()
@@ -58,5 +60,26 @@ void AddNewProfileDialog::on_buttonBox_accepted()
     profileToEdit.Addres = ui->address->text();
     profileToEdit.Telephone = ui->telephone->text().toUInt();
     profileToEdit.Sex = ui->sexComboBox->currentIndex()==0;
+    profileToEdit.Sensei = ui->sensei->text();
 }
 
+void AddNewProfileDialog::UpdateAgeLabel(QDate date)
+{
+    QDateTime current = QDateTime::currentDateTime();
+    QDateTime fullBirthday = QDateTime(date, QTime(0,0));
+    auto totalSecs =  fullBirthday.secsTo(current);
+    int totalYears = 0;
+    while(totalSecs > 0)
+    {
+        totalSecs -= SecsInYear;
+        if(totalSecs > 0)
+            totalYears++;
+    }
+    ui->ageLabel->setText(Age + QString::number(totalYears));
+}
+
+
+void AddNewProfileDialog::on_calendarWidget_clicked(const QDate &date)
+{
+    UpdateAgeLabel(date);
+}
