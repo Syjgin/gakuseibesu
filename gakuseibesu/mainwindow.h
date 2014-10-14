@@ -20,11 +20,14 @@ public:
 private slots:
     void on_buttonAdd_clicked();
 
+    void on_buttonEdit_clicked();
+
 private:
     Ui::MainWindow *ui;
     Database *base;
     int currentIndex;
     void RefreshProfileList();
+    AddNewProfileDialog *profileDialog;
 };
 
 #endif // MAINWINDOW_H

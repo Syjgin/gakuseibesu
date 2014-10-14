@@ -11,7 +11,7 @@ Database::Database()
     if(!tables.contains("people"))
     {
         QSqlQuery q;
-        if (!q.exec(QLatin1String("create table people(id integer primary key, firstname varchar, lastname varchar, patronym varchar, birthday date, document varchar, addres varchar, telephone integer, sex integer)")))
+        if (!q.exec(QLatin1String("create table people(id integer primary key, firstname varchar, lastname varchar, patronym varchar, birthday date, document varchar, addres varchar, telephone integer, sex integer, sensei varchar)")))
             LogError(q.lastError());
     }
     if(!tables.contains("grades"))
@@ -26,7 +26,7 @@ Database::Database()
 QVariant Database::AddProfile(Profile profile)
 {
     QSqlQuery q;
-    if(!q.prepare(QLatin1String("insert into people(id, firstname, lastname, patronym, birthday, document, addres, telephone, sex) values(?, ?, ?, ?, ?, ?, ?, ?, ?)")))
+    if(!q.prepare(QLatin1String("insert into people(id, firstname, lastname, patronym, birthday, document, addres, telephone, sex, sensei) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
         LogError(q.lastError());
     q.addBindValue(profile.Id);
     q.addBindValue(profile.Firstname);
@@ -37,6 +37,8 @@ QVariant Database::AddProfile(Profile profile)
     q.addBindValue(profile.Addres);
     q.addBindValue(profile.Telephone);
     q.addBindValue(profile.Sex);
+    q.addBindValue(profile.Sensei);
+
     q.exec();
     LogError(q.lastError());
     return q.lastInsertId();
@@ -58,7 +60,7 @@ QVariant Database::AddGrade(Grade grade)
 bool Database::UpdateProfile(Profile profile)
 {
     QSqlQuery q;
-    if(!q.prepare(QLatin1String("update people set firstname=?, lastname=?, patronym=?, birthday=?, document=?, addres=?, telephone=?, sex=? where id=?")))
+    if(!q.prepare(QLatin1String("update people set firstname=?, lastname=?, patronym=?, birthday=?, document=?, addres=?, telephone=?, sex=?, sensei=? where id=?")))
         LogError(q.lastError());
     q.addBindValue(profile.Firstname);
     q.addBindValue(profile.Lastname);
@@ -68,7 +70,9 @@ bool Database::UpdateProfile(Profile profile)
     q.addBindValue(profile.Addres);
     q.addBindValue(profile.Telephone);
     q.addBindValue(profile.Sex);
+    q.addBindValue(profile.Sensei);
     q.addBindValue(profile.Id);
+
     auto res = q.exec();
     LogError(q.lastError());
     return res;
@@ -150,6 +154,7 @@ QList<Profile> Database::AllProfiles()
         int addresIndex = rec.indexOf("addres");
         int telIndex = rec.indexOf("telephone");
         int sexIndex = rec.indexOf("sex");
+        int senseiIndex = rec.indexOf("sensei");
 
         profile.Id = q.value(idIndex).toInt();
         profile.Firstname = q.value(firstnameIndex).toString();
@@ -160,6 +165,7 @@ QList<Profile> Database::AllProfiles()
         profile.Addres = q.value(addresIndex).toString();
         profile.Telephone = q.value(telIndex).toUInt();
         profile.Sex = q.value(sexIndex).toBool();
+        profile.Sensei = q.value(senseiIndex).toString();
 
         result.append(profile);
     }
@@ -186,6 +192,7 @@ Profile Database::GetUserById(int id)
         int addresIndex = rec.indexOf("addres");
         int telIndex = rec.indexOf("telephone");
         int sexIndex = rec.indexOf("sex");
+        int senseiIndex = rec.indexOf("sensei");
 
         profile.Id = q.value(idIndex).toInt();
         profile.Firstname = q.value(firstnameIndex).toString();
@@ -196,6 +203,7 @@ Profile Database::GetUserById(int id)
         profile.Addres = q.value(addresIndex).toString();
         profile.Telephone = q.value(telIndex).toUInt();
         profile.Sex = q.value(sexIndex).toBool();
+        profile.Sensei = q.value(senseiIndex).toString();
 
         return profile;
     }

@@ -29,11 +29,15 @@ void UnitTests::DatabaseTest()
     grade.Id = 1;
     grade.Date = QDate(2000, 1, 1);
 
-    auto insId0 = db->AddProfile(profile).toInt();
-    auto insId1 = db->AddGrade(grade).toInt();
-    auto insId2 = db->AddProfile(profile2).toInt();
+    int insId0 = db->AddProfile(profile).toInt();
+    int insId1 = db->AddGrade(grade).toInt();
+    int insId2 = db->AddProfile(profile2).toInt();
     auto profileList = db->AllProfiles();
     QVERIFY(profileList.count() == 2);
+
+    Profile extractedProfile = db->GetUserById(insId2);
+
+    QVERIFY(extractedProfile.Firstname == "Петр");
 
     auto gradeList = db->GetGradesByProfile(profile);
     QVERIFY(gradeList.count() == 1);

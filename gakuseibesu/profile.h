@@ -14,6 +14,7 @@ public:
     QString Addres;
     uint Telephone;
     bool Sex;
+    QString Sensei;
     Profile() {}
 };
 
