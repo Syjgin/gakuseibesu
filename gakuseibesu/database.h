@@ -8,22 +8,24 @@
 class Database
 {
 public:
-    Database();
+    static Database *GetInstance();
     QVariant AddProfile(Profile profile);
     QVariant AddGrade(Grade grade);
 
     bool UpdateProfile(Profile profile);
     bool UpdateGrade(Grade grade);
 
-    bool DeleteProfile(Profile profile);
-    bool DeleteGrade(Grade grade);
+    bool DeleteProfile(int profileId);
+    bool DeleteGrade(int gradeId);
 
-    QList<Grade> GetGradesByProfile(Profile profile);
+    QList<Grade> GetGradesByProfile(int id);
     QList<Profile> AllProfiles();
     Profile GetUserById(int id);
-
+    Grade GetGradeById(int id);
     void RemoveDatabase();
 private:
+    Database();
+    static Database *instance;
     void LogError(QSqlError error);
     const char* dbName = ":gakusei:";
 };

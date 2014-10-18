@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     if (!QSqlDatabase::drivers().contains("QSQLITE"))
             QMessageBox::critical(this, "Unable to load database", "This demo needs the SQLITE driver");
-    base = new Database();
+    base = Database::GetInstance();
     RefreshProfileList();
 }
 
@@ -18,19 +18,17 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete base;
-    if(profileDialog != NULL)
-        delete profileDialog;
 }
 
 void MainWindow::on_buttonAdd_clicked()
 {
-    profileDialog = new AddNewProfileDialog(this);
+    auto profileDialog = new AddNewProfileDialog(this);
     profileDialog->setModal(true);
     profileDialog->SetPurpose(AddNewProfileDialog::Purpose::AddNewProfile);
+    profileDialog->SetId(currentIndex+1);
     if(profileDialog->exec() == QDialog::Accepted)
     {
         auto profileToAdd = profileDialog->GetUpdatedProfile();
-        profileToAdd.Id = currentIndex;
         base->AddProfile(profileToAdd);
         RefreshProfileList();
         delete profileDialog;
@@ -52,24 +50,34 @@ void MainWindow::RefreshProfileList()
         if(currentProfile.Id > currentIndex)
             currentIndex = currentProfile.Id;
     }
-    currentIndex++;
+}
+
+void MainWindow::ShowEditDialog(int id)
+{
+    auto profileDialog = new AddNewProfileDialog(this);
+    profileDialog->setModal(true);
+    profileDialog->SetPurpose(AddNewProfileDialog::Purpose::EditProfile);
+    Profile selectedProfile = base->GetUserById(id);
+    profileDialog->LoadProfile(selectedProfile);
+    if(profileDialog->exec() == QDialog::Accepted)
+    {
+        base->UpdateProfile(profileDialog->GetUpdatedProfile());
+        RefreshProfileList();
+        delete profileDialog;
+    }
 }
 
 void MainWindow::on_buttonEdit_clicked()
 {
     if(ui->listWidget->selectedItems().count() > 0)
     {
-        profileDialog = new AddNewProfileDialog(this);
-        profileDialog->setModal(true);
-        profileDialog->SetPurpose(AddNewProfileDialog::Purpose::EditProfile);
         int id = ui->listWidget->selectedItems()[0]->data(Qt::UserRole).toInt();
-        Profile selectedProfile = base->GetUserById(id);
-        profileDialog->LoadProfile(selectedProfile);
-        if(profileDialog->exec() == QDialog::Accepted)
-        {
-            base->UpdateProfile(profileDialog->GetUpdatedProfile());
-            RefreshProfileList();
-            delete profileDialog;
-        }
+        ShowEditDialog(id);
     }
+}
+
+void MainWindow::on_listWidget_doubleClicked(const QModelIndex &index)
+{
+    int id = index.data(Qt::UserRole).toInt();
+    ShowEditDialog(id);
 }

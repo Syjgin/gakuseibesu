@@ -1,7 +1,7 @@
 #ifndef ADDNEWPROFILEDIALOG_H
 #define ADDNEWPROFILEDIALOG_H
-#include "profile.h"
 #include <QDialog>
+#include "editgrades.h"
 
 namespace Ui {
 class AddNewProfileDialog;
@@ -22,16 +22,20 @@ public:
     void LoadProfile(Profile profile);
     Profile GetUpdatedProfile();
     void SetPurpose(Purpose purpose);
+    void SetId(int id);
 private slots:
     void on_buttonBox_accepted();
-    void on_calendarWidget_clicked(const QDate &date);
+
+    void on_dateEdit_userDateChanged(const QDate &date);
+
+    void on_editGrades_clicked();
 
 private:
     Profile profileToEdit;
     Ui::AddNewProfileDialog *ui;
 
     void UpdateAgeLabel(QDate date);
-
+    void UpdateGradeLabel();
     const QString EditTitle = tr("Edit profile");
     const QString AddNewTitle = tr("Add new profile");
     const QString Age = tr("Age: ");

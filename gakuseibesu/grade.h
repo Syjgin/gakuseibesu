@@ -9,6 +9,7 @@ public:
     int Id;
     QDate Date;
     int PeopleId;
+    QString GradeString;
     Grade() {}
 };
 #endif // GRADE_H

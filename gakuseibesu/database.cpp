@@ -1,5 +1,6 @@
 #include <QDebug>
 #include "database.h"
+Database *Database::instance = NULL;
 
 Database::Database()
 {
@@ -17,10 +18,16 @@ Database::Database()
     if(!tables.contains("grades"))
     {
         QSqlQuery q;
-        if (!q.exec(QLatin1String("create table grades(id integer primary key, peopleId varchar, date date)")))
+        if (!q.exec(QLatin1String("create table grades(id integer primary key, peopleId varchar, receiveDate date, gradeString varchar)")))
             LogError(q.lastError());
     }
+}
 
+Database *Database::GetInstance()
+{
+    if(instance == NULL)
+        instance = new Database();
+    return instance;
 }
 
 QVariant Database::AddProfile(Profile profile)
@@ -47,11 +54,12 @@ QVariant Database::AddProfile(Profile profile)
 QVariant Database::AddGrade(Grade grade)
 {
     QSqlQuery q;
-    if(!q.prepare(QLatin1String("insert into grades(id, peopleId, date) values(?, ?, ?)")))
+    if(!q.prepare(QLatin1String("insert into grades(id, peopleId, receiveDate, gradeString) values(?, ?, ?, ?)")))
         LogError(q.lastError());
     q.addBindValue(grade.Id);
     q.addBindValue(grade.PeopleId);
     q.addBindValue(grade.Date);
+    q.addBindValue(grade.GradeString);
     q.exec();
     LogError(q.lastError());
     return q.lastInsertId();
@@ -81,53 +89,55 @@ bool Database::UpdateProfile(Profile profile)
 bool Database::UpdateGrade(Grade grade)
 {
     QSqlQuery q;
-    if(!q.prepare(QLatin1String("update grades set peopleId=?, date=? where id=?")))
+    if(!q.prepare(QLatin1String("update grades set peopleId=?, receiveDate=?, gradeString=? where id=?")))
         LogError(q.lastError());
     q.addBindValue(grade.PeopleId);
     q.addBindValue(grade.Date);
+    q.addBindValue(grade.GradeString);
     q.addBindValue(grade.Id);
     auto res = q.exec();
     LogError(q.lastError());
     return res;
 }
 
-bool Database::DeleteProfile(Profile profile)
+bool Database::DeleteProfile(int profileId)
 {
     QSqlQuery q;
     if(!q.prepare(QLatin1String("delete from people where id=?")))
         LogError(q.lastError());
-    q.addBindValue(profile.Id);
+    q.addBindValue(profileId);
     return q.exec();
 }
 
-bool Database::DeleteGrade(Grade grade)
+bool Database::DeleteGrade(int gradeId)
 {
     QSqlQuery q;
     if(!q.prepare(QLatin1String("delete from grades where id=?")))
         LogError(q.lastError());
-    q.addBindValue(grade.Id);
+    q.addBindValue(gradeId);
     return q.exec();
 }
 
-QList<Grade> Database::GetGradesByProfile(Profile profile)
+QList<Grade> Database::GetGradesByProfile(int id)
 {
     auto result = QList<Grade>();
     QSqlQuery q;
     if(!q.prepare(QLatin1String("select * from grades where peopleId=?")))
         LogError(q.lastError());
-    q.addBindValue(profile.Id);
+    q.addBindValue(id);
     q.exec();
     while (q.next()) {
         QSqlRecord rec = q.record();
         Grade grade;
 
         int idIndex = rec.indexOf("id");
-        int dateIndex = rec.indexOf("date");
-
+        int dateIndex = rec.indexOf("receiveDate");
+        int gradeStringIndex = rec.indexOf("gradeString");
         Grade gradeRec;
         gradeRec.Id = q.value(idIndex).toInt();
-        gradeRec.PeopleId = profile.Id;
+        gradeRec.PeopleId = id;
         gradeRec.Date = q.value(dateIndex).toDate();
+        gradeRec.GradeString = q.value(gradeStringIndex).toString();
 
         result.append(gradeRec);
     }
@@ -210,6 +220,32 @@ Profile Database::GetUserById(int id)
     return Profile();
 }
 
+Grade Database::GetGradeById(int id)
+{
+    QSqlQuery q;
+    if(!q.prepare(QLatin1String("select * from grades where id=?")))
+        LogError(q.lastError());
+    q.addBindValue(id);
+    q.exec();
+    while (q.next()) {
+        QSqlRecord rec = q.record();
+
+        int idIndex = rec.indexOf("id");
+        int dateIndex = rec.indexOf("receiveDate");
+        int peopleIdIndex = rec.indexOf("peopleId");
+        int gradeStringIndex = rec.indexOf("gradeString");
+
+        Grade gradeRec;
+        gradeRec.Id = q.value(idIndex).toInt();
+        gradeRec.Date = q.value(dateIndex).toDate();
+        gradeRec.GradeString = q.value(gradeStringIndex).toString();
+        gradeRec.PeopleId = q.value(peopleIdIndex).toInt();
+
+        return gradeRec;
+    }
+    return Grade();
+}
+
 void Database::RemoveDatabase()
 {
     QSqlQuery q;
@@ -219,6 +255,7 @@ void Database::RemoveDatabase()
     if(!q2.exec(QLatin1String("drop table people")))
         LogError(q2.lastError());
     QFile::remove(dbName);
+    instance = NULL;
 }
 
 void Database::LogError(QSqlError error)

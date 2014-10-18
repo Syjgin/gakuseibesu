@@ -15,15 +15,21 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
         database.cpp \
-    addnewprofiledialog.cpp
+    addnewprofiledialog.cpp \
+    editgrades.cpp \
+    addnewgrade.cpp
 
 HEADERS  += mainwindow.h \
     database.h \
     profile.h \
     grade.h \
-    addnewprofiledialog.h
+    addnewprofiledialog.h \
+    editgrades.h \
+    addnewgrade.h
 
 FORMS    += mainwindow.ui \
-    addnewprofiledialog.ui
+    addnewprofiledialog.ui \
+    editgrades.ui \
+    addnewgrade.ui
 CONFIG += c++11
 

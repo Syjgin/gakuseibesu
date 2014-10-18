@@ -8,6 +8,7 @@ AddNewProfileDialog::AddNewProfileDialog(QWidget *parent) :
     ui->setupUi(this);
     profileToEdit = Profile();
     ui->telephone->setValidator(new QIntValidator());
+    ui->dateEdit->setDate(QDate::currentDate());
 }
 
 AddNewProfileDialog::~AddNewProfileDialog()
@@ -21,13 +22,14 @@ void AddNewProfileDialog::LoadProfile(Profile profile)
     ui->firstName->setText(profileToEdit.Firstname);
     ui->lastName->setText(profileToEdit.Lastname);
     ui->patronymic->setText(profileToEdit.Patronym);
-    ui->calendarWidget->setSelectedDate(profileToEdit.Birthday);
+    ui->dateEdit->setDate(profileToEdit.Birthday);
     UpdateAgeLabel(profileToEdit.Birthday);
     ui->document->setText(profileToEdit.Document);
     ui->address->setText(profileToEdit.Addres);
     ui->telephone->setText(QString::number(profileToEdit.Telephone));
     ui->sexComboBox->setCurrentIndex(profileToEdit.Sex==0);
     ui->sensei->setText(profileToEdit.Sensei);
+    UpdateGradeLabel();
 }
 
 Profile AddNewProfileDialog::GetUpdatedProfile()
@@ -49,13 +51,18 @@ void AddNewProfileDialog::SetPurpose(AddNewProfileDialog::Purpose purpose)
     }
 }
 
+void AddNewProfileDialog::SetId(int id)
+{
+    profileToEdit.Id = id;
+}
+
 
 void AddNewProfileDialog::on_buttonBox_accepted()
 {
     profileToEdit.Firstname = ui->firstName->text();
     profileToEdit.Lastname = ui->lastName->text();
     profileToEdit.Patronym = ui->patronymic->text();
-    profileToEdit.Birthday = ui->calendarWidget->selectedDate();
+    profileToEdit.Birthday = ui->dateEdit->date();
     profileToEdit.Document = ui->document->text();
     profileToEdit.Addres = ui->address->text();
     profileToEdit.Telephone = ui->telephone->text().toUInt();
@@ -78,8 +85,32 @@ void AddNewProfileDialog::UpdateAgeLabel(QDate date)
     ui->ageLabel->setText(Age + QString::number(totalYears));
 }
 
+void AddNewProfileDialog::UpdateGradeLabel()
+{
+    auto grades = Database::GetInstance()->GetGradesByProfile(profileToEdit.Id);
+    Grade selectedGrade;
+    if(grades.count() > 0)
+        selectedGrade = grades[0];
+    else
+        return;
+    if(grades.count() > 1)
+        foreach (Grade currentGrade, grades) {
+            if(currentGrade.Date > selectedGrade.Date)
+                selectedGrade = currentGrade;
+        }
+    ui->lastGrade->setText(selectedGrade.GradeString);
+}
 
-void AddNewProfileDialog::on_calendarWidget_clicked(const QDate &date)
+void AddNewProfileDialog::on_dateEdit_userDateChanged(const QDate &date)
 {
     UpdateAgeLabel(date);
+}
+
+void AddNewProfileDialog::on_editGrades_clicked()
+{
+    auto editGradesWindow = new EditGrades(profileToEdit.Id, this);
+    editGradesWindow->setModal(true);
+    editGradesWindow->exec();
+    UpdateGradeLabel();
+    delete editGradesWindow;
 }
