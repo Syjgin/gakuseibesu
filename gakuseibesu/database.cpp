@@ -106,6 +106,12 @@ bool Database::DeleteProfile(int profileId)
     if(!q.prepare(QLatin1String("delete from people where id=?")))
         LogError(q.lastError());
     q.addBindValue(profileId);
+    auto gradesList = GetGradesByProfile(profileId);
+    foreach(Grade currentGrade, gradesList)
+    {
+        DeleteGrade(currentGrade.Id);
+    }
+
     return q.exec();
 }
 
@@ -179,6 +185,53 @@ QList<Profile> Database::AllProfiles()
 
         result.append(profile);
     }
+    return result;
+}
+
+QList<Profile> Database::FindProfiles(Profile targetProf, QDate beginDate, QDate endDate, Grade targetGrade)
+{
+    auto result = QList<Profile>();
+    QSqlQuery q;
+    if(!q.prepare(QLatin1String("select * from people where firstname like ? or lastname like ? or patronym like ? or document like ? or addres like ? or telephone like ? or sex like ? or sensei like ?")))
+        LogError(q.lastError());
+    q.addBindValue(targetProf.Firstname);
+    q.addBindValue(targetProf.Lastname);
+    q.addBindValue(targetProf.Patronym);
+    q.addBindValue(targetProf.Document);
+    q.addBindValue(targetProf.Addres);
+    q.addBindValue(targetProf.Telephone);
+    q.addBindValue(targetProf.Sex);
+    q.addBindValue(targetProf.Sensei);
+    q.exec();
+    while (q.next()) {
+        QSqlRecord rec = q.record();
+        Profile profile;
+
+        int idIndex = rec.indexOf("id");
+        int firstnameIndex = rec.indexOf("firstname");
+        int lastnameIndex = rec.indexOf("lastname");
+        int patronymIndex = rec.indexOf("patronym");
+        int birthdayIndex = rec.indexOf("birthday");
+        int documentIndex = rec.indexOf("document");
+        int addresIndex = rec.indexOf("addres");
+        int telIndex = rec.indexOf("telephone");
+        int sexIndex = rec.indexOf("sex");
+        int senseiIndex = rec.indexOf("sensei");
+
+        profile.Id = q.value(idIndex).toInt();
+        profile.Firstname = q.value(firstnameIndex).toString();
+        profile.Lastname = q.value(lastnameIndex).toString();
+        profile.Patronym = q.value(patronymIndex).toString();
+        profile.Birthday = q.value(birthdayIndex).toDate();
+        profile.Document = q.value(documentIndex).toString();
+        profile.Addres = q.value(addresIndex).toString();
+        profile.Telephone = q.value(telIndex).toUInt();
+        profile.Sex = q.value(sexIndex).toBool();
+        profile.Sensei = q.value(senseiIndex).toString();
+
+        result.append(profile);
+    }
+
     return result;
 }
 

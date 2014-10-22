@@ -3,7 +3,7 @@
 
 void UnitTests::DatabaseTest()
 {
-    Database *db = new Database();
+    Database *db = Database::GetInstance();
     Profile profile;
     profile.Id = 0;
     profile.Firstname = "Иван";
@@ -16,7 +16,7 @@ void UnitTests::DatabaseTest()
 
     Profile profile2;
     profile2.Id = 1;
-    profile2.Firstname = "Петр";
+    profile2.Firstname = "Petr";
     profile2.Lastname = "Иванов";
     profile2.Patronym = "Иванович";
     profile2.Birthday = QDate(1970, 1, 1);
@@ -26,7 +26,7 @@ void UnitTests::DatabaseTest()
 
     Grade grade;
     grade.PeopleId = 0;
-    grade.Id = 1;
+    grade.Id = 0;
     grade.Date = QDate(2000, 1, 1);
 
     int insId0 = db->AddProfile(profile).toInt();
@@ -37,9 +37,9 @@ void UnitTests::DatabaseTest()
 
     Profile extractedProfile = db->GetUserById(insId2);
 
-    QVERIFY(extractedProfile.Firstname == "Петр");
+    QVERIFY(extractedProfile.Firstname == "Petr");
 
-    auto gradeList = db->GetGradesByProfile(profile);
+    auto gradeList = db->GetGradesByProfile(profile.Id);
     QVERIFY(gradeList.count() == 1);
 
     auto user = db->GetUserById(1);
@@ -55,16 +55,22 @@ void UnitTests::DatabaseTest()
     grade.PeopleId = 1;
     QVERIFY(db->UpdateGrade(grade));
 
-    auto gradeList2 = db->GetGradesByProfile(profile2);
+    auto gradeList2 = db->GetGradesByProfile(profile2.Id);
     QVERIFY(gradeList2.count() == 1);
 
-    db->DeleteProfile(profile);
+    Profile profileToFind = Profile();
+    profileToFind.Lastname = "Иванов";
+    profileToFind.Sensei = "yoda";
+    auto findResults = db->FindProfiles(profileToFind, QDate::currentDate(), QDate::currentDate(), Grade());
+    QVERIFY(findResults.count() == 2);
+
+    db->DeleteProfile(profile.Id);
     auto allProfiles = db->AllProfiles();
     QVERIFY(allProfiles.count() == 1);
 
-    db->DeleteGrade(grade);
+    db->DeleteGrade(grade.Id);
 
-    auto gradeList3 = db->GetGradesByProfile(profile2);
+    auto gradeList3 = db->GetGradesByProfile(profile2.Id);
     QVERIFY(gradeList3.count() == 0);
 
     db->RemoveDatabase();

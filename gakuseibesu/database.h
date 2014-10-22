@@ -20,6 +20,7 @@ public:
 
     QList<Grade> GetGradesByProfile(int id);
     QList<Profile> AllProfiles();
+    QList<Profile> FindProfiles(Profile targetProf, QDate beginDate, QDate endDate, Grade targetGrade);
     Profile GetUserById(int id);
     Grade GetGradeById(int id);
     void RemoveDatabase();
