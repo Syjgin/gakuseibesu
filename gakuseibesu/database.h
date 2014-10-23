@@ -20,7 +20,7 @@ public:
 
     QList<Grade> GetGradesByProfile(int id);
     QList<Profile> AllProfiles();
-    QList<Profile> FindProfiles(Profile targetProf, QDate beginDate, QDate endDate, Grade targetGrade);
+    QList<Profile> FindProfiles(QList<QString> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade);
     Profile GetUserById(int id);
     Grade GetGradeById(int id);
     void RemoveDatabase();
@@ -29,6 +29,7 @@ private:
     static Database *instance;
     void LogError(QSqlError error);
     const char* dbName = ":gakusei:";
+    void AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues);
 };
 
 #endif // DATABASE_H

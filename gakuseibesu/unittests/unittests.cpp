@@ -61,12 +61,43 @@ void UnitTests::DatabaseTest()
     Profile profileToFind = Profile();
     profileToFind.Lastname = "Иванов";
     profileToFind.Sensei = "yoda";
-    auto findResults = db->FindProfiles(profileToFind, QDate::currentDate(), QDate::currentDate(), Grade());
+    QList<QString> searchFields = QList<QString>();
+    searchFields.append("lastname");
+    auto findResults = db->FindProfiles(searchFields, profileToFind, QDate::currentDate(), QDate::currentDate(), Grade());
     QVERIFY(findResults.count() == 2);
+
+    Profile profile3;
+    profile3.Id = 2;
+    profile3.Firstname = "a";
+    profile3.Lastname = "b";
+    profile3.Patronym = "c";
+    profile3.Birthday = QDate(1989, 1, 1);
+    profile3.Document = "d";
+    profile3.Telephone = 8;
+    profile3.Sex = 0;
+
+    db->AddProfile(profile3);
+
+    Profile profile4;
+    profile4.Id = 3;
+    profile4.Firstname = "a";
+    profile4.Lastname = "b";
+    profile4.Patronym = "c";
+    profile4.Birthday = QDate(1981, 1, 1);
+    profile4.Document = "d";
+    profile4.Telephone = 8;
+    profile4.Sex = 0;
+
+    db->AddProfile(profile4);
+    QList<QString> searchFields2 = QList<QString>();
+    searchFields2.append("date");
+    auto findResults2 = db->FindProfiles(searchFields2, Profile(), QDate(1980, 1, 1), QDate(1990, 1, 1), Grade());
+
+    QVERIFY(findResults2.count() == 2);
 
     db->DeleteProfile(profile.Id);
     auto allProfiles = db->AllProfiles();
-    QVERIFY(allProfiles.count() == 1);
+    QVERIFY(allProfiles.count() == 3);
 
     db->DeleteGrade(grade.Id);
 

@@ -188,20 +188,46 @@ QList<Profile> Database::AllProfiles()
     return result;
 }
 
-QList<Profile> Database::FindProfiles(Profile targetProf, QDate beginDate, QDate endDate, Grade targetGrade)
+QList<Profile> Database::FindProfiles(QList<QString> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade)
 {
     auto result = QList<Profile>();
     QSqlQuery q;
-    if(!q.prepare(QLatin1String("select * from people where firstname like ? or lastname like ? or patronym like ? or document like ? or addres like ? or telephone like ? or sex like ? or sensei like ?")))
+    QString queryString = "select * from people where ";
+    QList<QString> bindValues = QList<QString>();
+    if(searchFields.contains("firstname"))
+        AddParameterToSearchQuery("firstname", searchPattern.Firstname, queryString, bindValues);
+    if(searchFields.contains("lastname"))
+        AddParameterToSearchQuery("lastname", searchPattern.Lastname, queryString, bindValues);
+    if(searchFields.contains("patronym"))
+        AddParameterToSearchQuery("patronym", searchPattern.Patronym, queryString, bindValues);
+    if(searchFields.contains("document"))
+        AddParameterToSearchQuery("document", searchPattern.Document, queryString, bindValues);
+    if(searchFields.contains("addres"))
+        AddParameterToSearchQuery("addres", searchPattern.Addres, queryString, bindValues);
+    if(searchFields.contains("telephone"))
+        AddParameterToSearchQuery("telephone", QString::number(searchPattern.Telephone), queryString, bindValues);
+    if(searchFields.contains("sex"))
+        AddParameterToSearchQuery("sex", QString::number(searchPattern.Sex), queryString, bindValues);
+    if(searchFields.contains("sensei"))
+        AddParameterToSearchQuery("sensei", searchPattern.Sensei, queryString, bindValues);
+    if(searchFields.contains("date"))
+    {
+        if(bindValues.count() > 0)
+            queryString += "or ";
+        queryString += " birthday between date(?) and date(?)";
+        QString date1 = beginDate.toString(Qt::ISODate);
+        QString date2 = endDate.toString(Qt::ISODate);
+        bindValues.append(date1);
+        bindValues.append(date2);
+    }
+
+    if(!q.prepare(queryString))
         LogError(q.lastError());
-    q.addBindValue(targetProf.Firstname);
-    q.addBindValue(targetProf.Lastname);
-    q.addBindValue(targetProf.Patronym);
-    q.addBindValue(targetProf.Document);
-    q.addBindValue(targetProf.Addres);
-    q.addBindValue(targetProf.Telephone);
-    q.addBindValue(targetProf.Sex);
-    q.addBindValue(targetProf.Sensei);
+
+    foreach (QString bindValue, bindValues) {
+        q.addBindValue(bindValue);
+    }
+
     q.exec();
     while (q.next()) {
         QSqlRecord rec = q.record();
@@ -314,6 +340,17 @@ void Database::RemoveDatabase()
 void Database::LogError(QSqlError error)
 {
     qDebug(error.text().toStdString().c_str());
+}
+
+void Database::AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues)
+{
+    if(value != "")
+    {
+        if(bindValues.count() > 0)
+            query.append("or ");
+        query.append(valueName + " like ? ");
+        bindValues.append(value);
+    }
 }
 
 
