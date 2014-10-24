@@ -188,76 +188,128 @@ QList<Profile> Database::AllProfiles()
     return result;
 }
 
-QList<Profile> Database::FindProfiles(QList<QString> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade)
+QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate)
 {
     auto result = QList<Profile>();
-    QSqlQuery q;
-    QString queryString = "select * from people where ";
-    QList<QString> bindValues = QList<QString>();
-    if(searchFields.contains("firstname"))
-        AddParameterToSearchQuery("firstname", searchPattern.Firstname, queryString, bindValues);
-    if(searchFields.contains("lastname"))
-        AddParameterToSearchQuery("lastname", searchPattern.Lastname, queryString, bindValues);
-    if(searchFields.contains("patronym"))
-        AddParameterToSearchQuery("patronym", searchPattern.Patronym, queryString, bindValues);
-    if(searchFields.contains("document"))
-        AddParameterToSearchQuery("document", searchPattern.Document, queryString, bindValues);
-    if(searchFields.contains("addres"))
-        AddParameterToSearchQuery("addres", searchPattern.Addres, queryString, bindValues);
-    if(searchFields.contains("telephone"))
-        AddParameterToSearchQuery("telephone", QString::number(searchPattern.Telephone), queryString, bindValues);
-    if(searchFields.contains("sex"))
-        AddParameterToSearchQuery("sex", QString::number(searchPattern.Sex), queryString, bindValues);
-    if(searchFields.contains("sensei"))
-        AddParameterToSearchQuery("sensei", searchPattern.Sensei, queryString, bindValues);
-    if(searchFields.contains("date"))
+
+    if(searchFields.contains(SearchFields::firstname) || searchFields.contains(SearchFields::lastname) || searchFields.contains(SearchFields::patronym) || searchFields.contains(SearchFields::document) ||
+            searchFields.contains(SearchFields::addres) || searchFields.contains(SearchFields::telephone) || searchFields.contains(SearchFields::sex) || searchFields.contains(SearchFields::sensei) ||
+            searchFields.contains(SearchFields::date))
     {
-        if(bindValues.count() > 0)
-            queryString += "or ";
-        queryString += " birthday between date(?) and date(?)";
-        QString date1 = beginDate.toString(Qt::ISODate);
-        QString date2 = endDate.toString(Qt::ISODate);
-        bindValues.append(date1);
-        bindValues.append(date2);
+        QSqlQuery q;
+        QString queryString = "select * from people where ";
+        QList<QString> bindValues = QList<QString>();
+        if(searchFields.contains(SearchFields::firstname))
+            AddParameterToSearchQuery("firstname", searchPattern.Firstname, queryString, bindValues);
+        if(searchFields.contains(SearchFields::lastname))
+            AddParameterToSearchQuery("lastname", searchPattern.Lastname, queryString, bindValues);
+        if(searchFields.contains(SearchFields::patronym))
+            AddParameterToSearchQuery("patronym", searchPattern.Patronym, queryString, bindValues);
+        if(searchFields.contains(SearchFields::document))
+            AddParameterToSearchQuery("document", searchPattern.Document, queryString, bindValues);
+        if(searchFields.contains(SearchFields::addres))
+            AddParameterToSearchQuery("addres", searchPattern.Addres, queryString, bindValues);
+        if(searchFields.contains(SearchFields::telephone))
+            AddParameterToSearchQuery("telephone", QString::number(searchPattern.Telephone), queryString, bindValues);
+        if(searchFields.contains(SearchFields::sex))
+            AddParameterToSearchQuery("sex", QString::number(searchPattern.Sex), queryString, bindValues);
+        if(searchFields.contains(SearchFields::sensei))
+            AddParameterToSearchQuery("sensei", searchPattern.Sensei, queryString, bindValues);
+        if(searchFields.contains(SearchFields::date))
+        {
+            if(bindValues.count() > 0)
+                queryString += "or ";
+            queryString += " birthday between date(?) and date(?)";
+            bindValues.append(beginDate.toString(Qt::ISODate));
+            bindValues.append(endDate.toString(Qt::ISODate));
+        }
+
+        if(!q.prepare(queryString))
+            LogError(q.lastError());
+
+        foreach (QString bindValue, bindValues) {
+            q.addBindValue(bindValue);
+        }
+
+        q.exec();
+        while (q.next()) {
+            QSqlRecord rec = q.record();
+            Profile profile;
+
+            int idIndex = rec.indexOf("id");
+            int firstnameIndex = rec.indexOf("firstname");
+            int lastnameIndex = rec.indexOf("lastname");
+            int patronymIndex = rec.indexOf("patronym");
+            int birthdayIndex = rec.indexOf("birthday");
+            int documentIndex = rec.indexOf("document");
+            int addresIndex = rec.indexOf("addres");
+            int telIndex = rec.indexOf("telephone");
+            int sexIndex = rec.indexOf("sex");
+            int senseiIndex = rec.indexOf("sensei");
+
+            profile.Id = q.value(idIndex).toInt();
+            profile.Firstname = q.value(firstnameIndex).toString();
+            profile.Lastname = q.value(lastnameIndex).toString();
+            profile.Patronym = q.value(patronymIndex).toString();
+            profile.Birthday = q.value(birthdayIndex).toDate();
+            profile.Document = q.value(documentIndex).toString();
+            profile.Addres = q.value(addresIndex).toString();
+            profile.Telephone = q.value(telIndex).toUInt();
+            profile.Sex = q.value(sexIndex).toBool();
+            profile.Sensei = q.value(senseiIndex).toString();
+
+            bool idFound = false;
+            foreach (Profile currentUser, result) {
+                if(currentUser.Id == profile.Id)
+                    idFound = true;
+            }
+            if(!idFound)
+                result.append(profile);
+        }
     }
 
-    if(!q.prepare(queryString))
-        LogError(q.lastError());
+    if(searchFields.contains(SearchFields::grade) || searchFields.contains(SearchFields::gradedate))
+    {
+        QSqlQuery q2;
+        QString q2queryString = "select peopleId from grades where ";
+        QList<QString> bindValues2 = QList<QString>();
+        if(searchFields.contains(SearchFields::grade))
+        {
+            q2queryString += "gradeString like ? ";
+            bindValues2.append(targetGrade.GradeString);
+        }
+        if(searchFields.contains(SearchFields::gradedate))
+        {
+            if(bindValues2.count() > 0)
+                q2queryString += "or ";
+            q2queryString += " receiveDate between date(?) and date(?)";
+            bindValues2.append(gradeBeginDate.toString(Qt::ISODate));
+            bindValues2.append(gradeEndDate.toString(Qt::ISODate));
+        }
+        if(!q2.prepare(q2queryString))
+            LogError(q2.lastError());
 
-    foreach (QString bindValue, bindValues) {
-        q.addBindValue(bindValue);
+        foreach (QString bindValue, bindValues2) {
+            q2.addBindValue(bindValue);
+        }
+        q2.exec();
+        while (q2.next()) {
+            QSqlRecord rec2 = q2.record();
+            Grade grade;
+
+            int idIndex = rec2.indexOf("peopleId");
+
+            int id = q2.value(idIndex).toInt();
+            auto user = GetUserById(id);
+            bool idFound = false;
+            foreach (Profile currentUser, result) {
+                if(currentUser.Id == user.Id)
+                    idFound = true;
+            }
+            if(!idFound)
+                result.append(user);
+        }
     }
-
-    q.exec();
-    while (q.next()) {
-        QSqlRecord rec = q.record();
-        Profile profile;
-
-        int idIndex = rec.indexOf("id");
-        int firstnameIndex = rec.indexOf("firstname");
-        int lastnameIndex = rec.indexOf("lastname");
-        int patronymIndex = rec.indexOf("patronym");
-        int birthdayIndex = rec.indexOf("birthday");
-        int documentIndex = rec.indexOf("document");
-        int addresIndex = rec.indexOf("addres");
-        int telIndex = rec.indexOf("telephone");
-        int sexIndex = rec.indexOf("sex");
-        int senseiIndex = rec.indexOf("sensei");
-
-        profile.Id = q.value(idIndex).toInt();
-        profile.Firstname = q.value(firstnameIndex).toString();
-        profile.Lastname = q.value(lastnameIndex).toString();
-        profile.Patronym = q.value(patronymIndex).toString();
-        profile.Birthday = q.value(birthdayIndex).toDate();
-        profile.Document = q.value(documentIndex).toString();
-        profile.Addres = q.value(addresIndex).toString();
-        profile.Telephone = q.value(telIndex).toUInt();
-        profile.Sex = q.value(sexIndex).toBool();
-        profile.Sensei = q.value(senseiIndex).toString();
-
-        result.append(profile);
-    }
-
     return result;
 }
 

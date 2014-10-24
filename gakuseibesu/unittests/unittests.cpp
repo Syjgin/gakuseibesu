@@ -29,9 +29,16 @@ void UnitTests::DatabaseTest()
     grade.Id = 0;
     grade.Date = QDate(2000, 1, 1);
 
+    Grade grade2;
+    grade2.PeopleId = 1;
+    grade2.Id = 1;
+    grade2.Date = QDate(2002, 1, 1);
+    grade2.GradeString = "string1";
+
     int insId0 = db->AddProfile(profile).toInt();
     int insId1 = db->AddGrade(grade).toInt();
     int insId2 = db->AddProfile(profile2).toInt();
+    db->AddGrade(grade2);
     auto profileList = db->AllProfiles();
     QVERIFY(profileList.count() == 2);
 
@@ -56,14 +63,14 @@ void UnitTests::DatabaseTest()
     QVERIFY(db->UpdateGrade(grade));
 
     auto gradeList2 = db->GetGradesByProfile(profile2.Id);
-    QVERIFY(gradeList2.count() == 1);
+    QVERIFY(gradeList2.count() == 2);
 
     Profile profileToFind = Profile();
     profileToFind.Lastname = "Иванов";
     profileToFind.Sensei = "yoda";
-    QList<QString> searchFields = QList<QString>();
-    searchFields.append("lastname");
-    auto findResults = db->FindProfiles(searchFields, profileToFind, QDate::currentDate(), QDate::currentDate(), Grade());
+    QList<Database::SearchFields> searchFields = QList<Database::SearchFields>();
+    searchFields.append(Database::SearchFields::lastname);
+    auto findResults = db->FindProfiles(searchFields, profileToFind, QDate::currentDate(), QDate::currentDate(), Grade(), QDate(), QDate());
     QVERIFY(findResults.count() == 2);
 
     Profile profile3;
@@ -89,11 +96,21 @@ void UnitTests::DatabaseTest()
     profile4.Sex = 0;
 
     db->AddProfile(profile4);
-    QList<QString> searchFields2 = QList<QString>();
-    searchFields2.append("date");
-    auto findResults2 = db->FindProfiles(searchFields2, Profile(), QDate(1980, 1, 1), QDate(1990, 1, 1), Grade());
-
+    QList<Database::SearchFields> searchFields2 = QList<Database::SearchFields>();
+    searchFields2.append(Database::SearchFields::date);
+    auto findResults2 = db->FindProfiles(searchFields2, Profile(), QDate(1980, 1, 1), QDate(1990, 1, 1), Grade(), QDate(), QDate());
     QVERIFY(findResults2.count() == 2);
+
+    QList<Database::SearchFields> searchFields3 = QList<Database::SearchFields>();
+    searchFields3.append(Database::SearchFields::grade);
+    Grade gradeToSearch = Grade();
+    gradeToSearch.GradeString = "string1";
+    auto findResults3 = db->FindProfiles(searchFields3, Profile(), QDate(), QDate(), gradeToSearch, QDate(), QDate());
+    QVERIFY(findResults3.count() == 1);
+    QList<Database::SearchFields> searchFields4 = QList<Database::SearchFields>();
+    searchFields4.append(Database::SearchFields::gradedate);
+    auto findResults4 = db->FindProfiles(searchFields4, Profile(), QDate(), QDate(), Grade(), QDate(1999, 1, 1), QDate(2003, 1, 1));
+    QVERIFY(findResults4.count() == 1);
 
     db->DeleteProfile(profile.Id);
     auto allProfiles = db->AllProfiles();
@@ -102,7 +119,8 @@ void UnitTests::DatabaseTest()
     db->DeleteGrade(grade.Id);
 
     auto gradeList3 = db->GetGradesByProfile(profile2.Id);
-    QVERIFY(gradeList3.count() == 0);
+    QVERIFY(gradeList3.count() == 1);
+
 
     db->RemoveDatabase();
 }

@@ -8,6 +8,21 @@
 class Database
 {
 public:
+    enum SearchFields
+    {
+        firstname,
+        lastname,
+        patronym,
+        document,
+        addres,
+        telephone,
+        sex,
+        sensei,
+        date,
+        grade,
+        gradedate
+    };
+
     static Database *GetInstance();
     QVariant AddProfile(Profile profile);
     QVariant AddGrade(Grade grade);
@@ -20,7 +35,7 @@ public:
 
     QList<Grade> GetGradesByProfile(int id);
     QList<Profile> AllProfiles();
-    QList<Profile> FindProfiles(QList<QString> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade);
+    QList<Profile> FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate);
     Profile GetUserById(int id);
     Grade GetGradeById(int id);
     void RemoveDatabase();
