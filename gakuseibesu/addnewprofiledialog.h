@@ -30,6 +30,8 @@ private slots:
 
     void on_editGrades_clicked();
 
+    void on_dateEdit_dateChanged(const QDate &date);
+
 private:
     Profile profileToEdit;
     Ui::AddNewProfileDialog *ui;

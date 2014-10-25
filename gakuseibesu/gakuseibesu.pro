@@ -17,7 +17,8 @@ SOURCES += main.cpp\
         database.cpp \
     addnewprofiledialog.cpp \
     editgrades.cpp \
-    addnewgrade.cpp
+    addnewgrade.cpp \
+    searchdialog.cpp
 
 HEADERS  += mainwindow.h \
     database.h \
@@ -25,11 +26,14 @@ HEADERS  += mainwindow.h \
     grade.h \
     addnewprofiledialog.h \
     editgrades.h \
-    addnewgrade.h
+    addnewgrade.h \
+    searchdialog.h
 
 FORMS    += mainwindow.ui \
     addnewprofiledialog.ui \
     editgrades.ui \
-    addnewgrade.ui
+    addnewgrade.ui \
+    searchdialog.ui
+
 CONFIG += c++11
 

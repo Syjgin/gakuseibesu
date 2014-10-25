@@ -12,7 +12,7 @@ public:
     QDate Birthday;
     QString Document;
     QString Addres;
-    uint Telephone;
+    QString Telephone;
     bool Sex;
     QString Sensei;
     Profile() {}

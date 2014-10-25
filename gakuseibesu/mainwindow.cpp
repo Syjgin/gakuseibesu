@@ -31,25 +31,34 @@ void MainWindow::on_buttonAdd_clicked()
         auto profileToAdd = profileDialog->GetUpdatedProfile();
         base->AddProfile(profileToAdd);
         RefreshProfileList();
-        delete profileDialog;
     }
+    delete profileDialog;
 }
 
-void MainWindow::RefreshProfileList()
+void MainWindow::FillProfilesList(QList<Profile> profilesList, bool changeCurrentIndex)
 {
     ui->listWidget->clear();
-    auto profilesList = base->AllProfiles();
     int currentRow = 0;
-    currentIndex = 0;
+    if(changeCurrentIndex)
+        currentIndex = 0;
     foreach (Profile currentProfile, profilesList) {
         QListWidgetItem *item = new QListWidgetItem();
         item->setText(currentProfile.Firstname+" "+currentProfile.Patronym+" "+currentProfile.Lastname);
         item->setData(Qt::UserRole, currentProfile.Id);
         ui->listWidget->insertItem(currentRow, item);
         currentRow++;
-        if(currentProfile.Id > currentIndex)
-            currentIndex = currentProfile.Id;
+        if(changeCurrentIndex)
+        {
+            if(currentProfile.Id > currentIndex)
+                currentIndex = currentProfile.Id;
+        }
     }
+}
+
+void MainWindow::RefreshProfileList()
+{
+    auto profilesList = base->AllProfiles();
+    FillProfilesList(profilesList, true);
 }
 
 void MainWindow::ShowEditDialog(int id)
@@ -63,8 +72,8 @@ void MainWindow::ShowEditDialog(int id)
     {
         base->UpdateProfile(profileDialog->GetUpdatedProfile());
         RefreshProfileList();
-        delete profileDialog;
     }
+    delete profileDialog;
 }
 
 void MainWindow::on_buttonEdit_clicked()
@@ -80,4 +89,31 @@ void MainWindow::on_listWidget_doubleClicked(const QModelIndex &index)
 {
     int id = index.data(Qt::UserRole).toInt();
     ShowEditDialog(id);
+}
+
+void MainWindow::on_buttonSearch_clicked()
+{
+    auto searchDialog = new SearchDialog(this);
+    searchDialog->setModal(true);
+    if(searchDialog->exec() == QDialog::Accepted)
+    {
+        auto profiles = searchDialog->GetSearchResults();
+        FillProfilesList(profiles, false);
+    }
+    delete searchDialog;
+}
+
+void MainWindow::on_buttonClear_clicked()
+{
+    RefreshProfileList();
+}
+
+void MainWindow::on_buttonDelete_clicked()
+{
+    if(ui->listWidget->selectedItems().count() > 0)
+    {
+        int id = ui->listWidget->selectedItems()[0]->data(Qt::UserRole).toInt();
+        base->DeleteProfile(id);
+        ui->listWidget->removeItemWidget(ui->listWidget->selectedItems()[0]);
+    }
 }

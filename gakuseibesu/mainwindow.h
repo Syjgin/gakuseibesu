@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "database.h"
 #include "addnewprofiledialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -25,11 +26,18 @@ private slots:
 
     void on_listWidget_doubleClicked(const QModelIndex &index);
 
+    void on_buttonSearch_clicked();
+
+    void on_buttonClear_clicked();
+
+    void on_buttonDelete_clicked();
+
 private:
     Ui::MainWindow *ui;
     Database *base;
     int currentIndex;
     void RefreshProfileList();
+    void FillProfilesList(QList<Profile> profilesList, bool changeCurrentIndex);
 };
 
 #endif // MAINWINDOW_H

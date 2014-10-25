@@ -7,7 +7,10 @@ AddNewProfileDialog::AddNewProfileDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     profileToEdit = Profile();
-    ui->telephone->setValidator(new QIntValidator());
+    QRegExp rx("\\d*");
+    QValidator *validator = new QRegExpValidator(rx, this);
+    ui->telephone->setValidator(validator);
+    ui->document->setValidator(validator);
     ui->dateEdit->setDate(QDate::currentDate());
 }
 
@@ -26,7 +29,7 @@ void AddNewProfileDialog::LoadProfile(Profile profile)
     UpdateAgeLabel(profileToEdit.Birthday);
     ui->document->setText(profileToEdit.Document);
     ui->address->setText(profileToEdit.Addres);
-    ui->telephone->setText(QString::number(profileToEdit.Telephone));
+    ui->telephone->setText(profileToEdit.Telephone);
     ui->sexComboBox->setCurrentIndex(profileToEdit.Sex==0);
     ui->sensei->setText(profileToEdit.Sensei);
     UpdateGradeLabel();
@@ -65,7 +68,7 @@ void AddNewProfileDialog::on_buttonBox_accepted()
     profileToEdit.Birthday = ui->dateEdit->date();
     profileToEdit.Document = ui->document->text();
     profileToEdit.Addres = ui->address->text();
-    profileToEdit.Telephone = ui->telephone->text().toUInt();
+    profileToEdit.Telephone = ui->telephone->text();
     profileToEdit.Sex = ui->sexComboBox->currentIndex()==0;
     profileToEdit.Sensei = ui->sensei->text();
 }
@@ -98,7 +101,7 @@ void AddNewProfileDialog::UpdateGradeLabel()
             if(currentGrade.Date > selectedGrade.Date)
                 selectedGrade = currentGrade;
         }
-    ui->lastGrade->setText(selectedGrade.GradeString);
+    ui->lastGrade->setText(selectedGrade.GradeString + " " + selectedGrade.Date.toString(Qt::ISODate));
 }
 
 void AddNewProfileDialog::on_dateEdit_userDateChanged(const QDate &date)
@@ -113,4 +116,10 @@ void AddNewProfileDialog::on_editGrades_clicked()
     editGradesWindow->exec();
     UpdateGradeLabel();
     delete editGradesWindow;
+}
+
+
+void AddNewProfileDialog::on_dateEdit_dateChanged(const QDate &date)
+{
+    UpdateAgeLabel(date);
 }

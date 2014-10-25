@@ -12,7 +12,7 @@ Database::Database()
     if(!tables.contains("people"))
     {
         QSqlQuery q;
-        if (!q.exec(QLatin1String("create table people(id integer primary key, firstname varchar, lastname varchar, patronym varchar, birthday date, document varchar, addres varchar, telephone integer, sex integer, sensei varchar)")))
+        if (!q.exec(QLatin1String("create table people(id integer primary key, firstname varchar, lastname varchar, patronym varchar, birthday date, document varchar, addres varchar, telephone varchar, sex integer, sensei varchar)")))
             LogError(q.lastError());
     }
     if(!tables.contains("grades"))
@@ -179,7 +179,7 @@ QList<Profile> Database::AllProfiles()
         profile.Birthday = q.value(birthdayIndex).toDate();
         profile.Document = q.value(documentIndex).toString();
         profile.Addres = q.value(addresIndex).toString();
-        profile.Telephone = q.value(telIndex).toUInt();
+        profile.Telephone = q.value(telIndex).toString();
         profile.Sex = q.value(sexIndex).toBool();
         profile.Sensei = q.value(senseiIndex).toString();
 
@@ -188,10 +188,10 @@ QList<Profile> Database::AllProfiles()
     return result;
 }
 
-QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate)
+QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate, bool useOr)
 {
     auto result = QList<Profile>();
-
+    QString glueString = useOr ? "or " : "and ";
     if(searchFields.contains(SearchFields::firstname) || searchFields.contains(SearchFields::lastname) || searchFields.contains(SearchFields::patronym) || searchFields.contains(SearchFields::document) ||
             searchFields.contains(SearchFields::addres) || searchFields.contains(SearchFields::telephone) || searchFields.contains(SearchFields::sex) || searchFields.contains(SearchFields::sensei) ||
             searchFields.contains(SearchFields::date))
@@ -200,25 +200,25 @@ QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile 
         QString queryString = "select * from people where ";
         QList<QString> bindValues = QList<QString>();
         if(searchFields.contains(SearchFields::firstname))
-            AddParameterToSearchQuery("firstname", searchPattern.Firstname, queryString, bindValues);
+            AddParameterToSearchQuery("firstname", searchPattern.Firstname, queryString, bindValues, glueString, SearchMethod::startsWith);
         if(searchFields.contains(SearchFields::lastname))
-            AddParameterToSearchQuery("lastname", searchPattern.Lastname, queryString, bindValues);
+            AddParameterToSearchQuery("lastname", searchPattern.Lastname, queryString, bindValues, glueString, SearchMethod::startsWith);
         if(searchFields.contains(SearchFields::patronym))
-            AddParameterToSearchQuery("patronym", searchPattern.Patronym, queryString, bindValues);
+            AddParameterToSearchQuery("patronym", searchPattern.Patronym, queryString, bindValues, glueString, SearchMethod::startsWith);
         if(searchFields.contains(SearchFields::document))
-            AddParameterToSearchQuery("document", searchPattern.Document, queryString, bindValues);
+            AddParameterToSearchQuery("document", searchPattern.Document, queryString, bindValues, glueString, SearchMethod::fullMatch);
         if(searchFields.contains(SearchFields::addres))
-            AddParameterToSearchQuery("addres", searchPattern.Addres, queryString, bindValues);
+            AddParameterToSearchQuery("addres", searchPattern.Addres, queryString, bindValues, glueString, SearchMethod::anyPlace);
         if(searchFields.contains(SearchFields::telephone))
-            AddParameterToSearchQuery("telephone", QString::number(searchPattern.Telephone), queryString, bindValues);
+            AddParameterToSearchQuery("telephone", searchPattern.Telephone, queryString, bindValues, glueString, SearchMethod::fullMatch);
         if(searchFields.contains(SearchFields::sex))
-            AddParameterToSearchQuery("sex", QString::number(searchPattern.Sex), queryString, bindValues);
+            AddParameterToSearchQuery("sex", QString::number(searchPattern.Sex), queryString, bindValues, glueString, SearchMethod::fullMatch);
         if(searchFields.contains(SearchFields::sensei))
-            AddParameterToSearchQuery("sensei", searchPattern.Sensei, queryString, bindValues);
+            AddParameterToSearchQuery("sensei", searchPattern.Sensei, queryString, bindValues, glueString, SearchMethod::startsWith);
         if(searchFields.contains(SearchFields::date))
         {
             if(bindValues.count() > 0)
-                queryString += "or ";
+                queryString += glueString;
             queryString += " birthday between date(?) and date(?)";
             bindValues.append(beginDate.toString(Qt::ISODate));
             bindValues.append(endDate.toString(Qt::ISODate));
@@ -254,7 +254,7 @@ QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile 
             profile.Birthday = q.value(birthdayIndex).toDate();
             profile.Document = q.value(documentIndex).toString();
             profile.Addres = q.value(addresIndex).toString();
-            profile.Telephone = q.value(telIndex).toUInt();
+            profile.Telephone = q.value(telIndex).toString();
             profile.Sex = q.value(sexIndex).toBool();
             profile.Sensei = q.value(senseiIndex).toString();
 
@@ -281,7 +281,7 @@ QList<Profile> Database::FindProfiles(QList<SearchFields> searchFields, Profile 
         if(searchFields.contains(SearchFields::gradedate))
         {
             if(bindValues2.count() > 0)
-                q2queryString += "or ";
+                q2queryString += glueString;
             q2queryString += " receiveDate between date(?) and date(?)";
             bindValues2.append(gradeBeginDate.toString(Qt::ISODate));
             bindValues2.append(gradeEndDate.toString(Qt::ISODate));
@@ -342,7 +342,7 @@ Profile Database::GetUserById(int id)
         profile.Birthday = q.value(birthdayIndex).toDate();
         profile.Document = q.value(documentIndex).toString();
         profile.Addres = q.value(addresIndex).toString();
-        profile.Telephone = q.value(telIndex).toUInt();
+        profile.Telephone = q.value(telIndex).toString();
         profile.Sex = q.value(sexIndex).toBool();
         profile.Sensei = q.value(senseiIndex).toString();
 
@@ -394,14 +394,33 @@ void Database::LogError(QSqlError error)
     qDebug(error.text().toStdString().c_str());
 }
 
-void Database::AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues)
+void Database::AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues, QString glue, SearchMethod method)
 {
     if(value != "")
     {
+        QString comparisonString = QString();
+        switch (method)
+        {
+        case SearchMethod::fullMatch:
+            comparisonString = " = ?";
+            break;
+        case SearchMethod::startsWith:
+            comparisonString = " like ?";
+            break;
+        case SearchMethod::anyPlace:
+            comparisonString = " like ?";
+            break;
+        default:
+            break;
+        }
+
         if(bindValues.count() > 0)
-            query.append("or ");
-        query.append(valueName + " like ? ");
-        bindValues.append(value);
+            query.append(glue);
+        query.append(valueName + comparisonString);
+        if(method != SearchMethod::anyPlace)
+            bindValues.append(value);
+        else
+            bindValues.append("%"+value+"%");
     }
 }
 

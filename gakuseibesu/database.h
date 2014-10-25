@@ -23,6 +23,13 @@ public:
         gradedate
     };
 
+    enum SearchMethod
+    {
+        fullMatch,
+        startsWith,
+        anyPlace
+    };
+
     static Database *GetInstance();
     QVariant AddProfile(Profile profile);
     QVariant AddGrade(Grade grade);
@@ -35,7 +42,7 @@ public:
 
     QList<Grade> GetGradesByProfile(int id);
     QList<Profile> AllProfiles();
-    QList<Profile> FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate);
+    QList<Profile> FindProfiles(QList<SearchFields> searchFields, Profile searchPattern, QDate beginDate, QDate endDate, Grade targetGrade, QDate gradeBeginDate, QDate gradeEndDate, bool useOr);
     Profile GetUserById(int id);
     Grade GetGradeById(int id);
     void RemoveDatabase();
@@ -44,7 +51,7 @@ private:
     static Database *instance;
     void LogError(QSqlError error);
     const char* dbName = ":gakusei:";
-    void AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues);
+    void AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues, QString glue, SearchMethod method);
 };
 
 #endif // DATABASE_H
