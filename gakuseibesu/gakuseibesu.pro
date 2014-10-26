@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui sql widgets xlsx
 
 TARGET = gakuseibesu
 TEMPLATE = app
@@ -36,4 +34,7 @@ FORMS    += mainwindow.ui \
     searchdialog.ui
 
 CONFIG += c++11
+
+RESOURCES += \
+    translations.qrc
 

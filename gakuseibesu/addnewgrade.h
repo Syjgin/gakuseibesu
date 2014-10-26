@@ -1,7 +1,7 @@
 #ifndef ADDNEWGRADE_H
 #define ADDNEWGRADE_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include "grade.h"
 
 namespace Ui {

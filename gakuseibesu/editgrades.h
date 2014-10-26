@@ -1,7 +1,7 @@
 #ifndef EDITGRADES_H
 #define EDITGRADES_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include "database.h"
 #include "addnewgrade.h"
 

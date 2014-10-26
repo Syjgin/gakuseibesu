@@ -1,7 +1,7 @@
 #ifndef SEARCHDIALOG_H
 #define SEARCHDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include "database.h"
 
 namespace Ui {

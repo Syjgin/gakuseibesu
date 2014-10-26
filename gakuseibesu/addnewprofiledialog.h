@@ -1,6 +1,6 @@
 #ifndef ADDNEWPROFILEDIALOG_H
 #define ADDNEWPROFILEDIALOG_H
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include "editgrades.h"
 
 namespace Ui {
