@@ -386,7 +386,7 @@ void Database::RemoveDatabase()
     if(!q2.exec(QLatin1String("drop table people")))
         LogError(q2.lastError());
     QFile::remove(dbName);
-    instance = NULL;
+    instance = new Database();
 }
 
 void Database::LogError(QSqlError error)

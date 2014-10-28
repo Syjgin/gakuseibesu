@@ -264,3 +264,12 @@ void MainWindow::on_action_About_Qt_triggered()
 {
     QMessageBox::aboutQt(this);
 }
+
+void MainWindow::on_actionDelete_DB_triggered()
+{
+    if(QMessageBox::question(this, tr("Confirmation"), tr("Are you sure to delete database? This action can't be cancelled!")) == QMessageBox::Yes)
+    {
+        Database::GetInstance()->RemoveDatabase();
+        RefreshProfileList();
+    }
+}

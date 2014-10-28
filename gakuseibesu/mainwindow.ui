@@ -89,6 +89,7 @@
     <addaction name="actionAdd_new_profile"/>
     <addaction name="actionSearch"/>
     <addaction name="actionExport"/>
+    <addaction name="actionDelete_DB"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -123,6 +124,11 @@
   <action name="action_About_Qt">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionDelete_DB">
+   <property name="text">
+    <string>delete DB</string>
    </property>
   </action>
  </widget>
