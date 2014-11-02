@@ -131,6 +131,7 @@ void MainWindow::on_buttonDelete_clicked()
         int id = ui->listWidget->selectedItems()[0]->data(Qt::UserRole).toInt();
         base->DeleteProfile(id);
         ui->listWidget->removeItemWidget(ui->listWidget->selectedItems()[0]);
+        RefreshProfileList();
     }
 }
 
