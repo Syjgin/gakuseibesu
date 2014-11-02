@@ -152,7 +152,7 @@ void MainWindow::on_buttonExport_clicked()
                                      saveCaption,
                                      QString(),
                                      filter);
-    if(!fileName.endsWith(defaultSuffix))
+    if(!fileName.endsWith(defaultSuffix) && !fileName.isEmpty())
     {
         fileName.append(defaultSuffix);
     }

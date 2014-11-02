@@ -50,7 +50,7 @@ private:
     Database();
     static Database *instance;
     void LogError(QSqlError error);
-    const char* dbName = ":gakusei:";
+    const char* dbName = "gakusei.sqlite";
     void AddParameterToSearchQuery(QString valueName, QString value, QString &query, QList<QString> &bindValues, QString glue, SearchMethod method);
 };
 
